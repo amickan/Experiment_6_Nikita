@@ -1,7 +1,7 @@
 # Experiment_6_Nikita
 
 To clone this repository type in your command window 
-```1git clone https://github.com/amickan/Experiment_6_Nikita```
+```git clone https://github.com/amickan/Experiment_6_Nikita```
 
 Move to the newly created repository by typing
 ``cd Experiment_6_Nikita```

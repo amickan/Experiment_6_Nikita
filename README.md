@@ -16,3 +16,5 @@ Once you have made changes to files in your branch:
 4. Commit your changes and add an informative message what you changed: ``git commit -m "your informative message"``
 5. Push the committed changes so that everyone can see them: ``git push ``
 6. This will prompt your to enter your Github credentials 
+
+When you get back to project, it is usually good practice to pull the latest version of the master to your branch, to do ``git pull -origin -master``

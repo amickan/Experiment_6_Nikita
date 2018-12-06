@@ -4,7 +4,7 @@ To clone this repository type in your command window
 ```git clone https://github.com/amickan/Experiment_6_Nikita```
 
 Move to the newly created repository by typing
-``cd Experiment_6_Nikita```
+```cd Experiment_6_Nikita```
 
 To create your own branch 
 ``git checkout -b your_name``

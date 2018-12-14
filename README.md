@@ -1,4 +1,4 @@
-# Experiment Nikita
+# Experiment Oscillatory signatures of incidental word learning
 
 To clone this repository type in your command window 
 ```git clone https://github.com/amickan/Experiment_6_Nikita```

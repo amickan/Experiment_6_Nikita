@@ -1,4 +1,4 @@
-# Experiment Oscillatory signatures of incidental word learning
+# Oscillatory signatures of incidental word learning
 
 Move to the directory in which you would like this Git repository to be cloned
 use ```cd``` to move down the directory structure

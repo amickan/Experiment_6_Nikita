@@ -1,12 +1,11 @@
 # Oscillatory signatures of incidental word learning
 
-Move to the directory in which you would like this Git repository to be cloned
-use ```cd``` to move down the directory structure
+Move to the directory in which you would like this Git repository to be cloned, use ```cd``` to move down the directory structure
 
-To clone this repository type in your command window 
+To clone this repository type in your command window:  
 ```git clone https://github.com/amickan/Experiment_6_Nikita```
 
-Move to the newly created repository by typing
+Move to the newly created repository by typing: 
 ```cd Experiment_6_Nikita```
 
 Once you have made changes to files:

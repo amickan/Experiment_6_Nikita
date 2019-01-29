@@ -2,6 +2,7 @@
 function PreprocessFinal(pNumber)
     cd('\\cnas.ru.nl\wrkgrp\STD-Back-Up-Exp2-EEG\') % this is where EEG data is stored 
 
+    % test
     % define files for this participant
     vhdr = strcat(num2str(pNumber), '\Day3\EEG\',num2str(pNumber), '.vhdr');
     preprocFile = strcat('PreprocessedData_firsthalf\', num2str(pNumber), '_FinalTestPart1_data_all_preprocessed');

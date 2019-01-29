@@ -1,5 +1,5 @@
 %%% EEG analysis script March 2018 %%%
-function PreprocessFinal(pNumber)
+%function PreprocessFinal(pNumber)
     cd('\\cnas.ru.nl\wrkgrp\STD-Back-Up-Exp2-EEG\') % this is where EEG data is stored 
 
     % test

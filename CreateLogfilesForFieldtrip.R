@@ -20,18 +20,26 @@ for (i in 1:length(A)){
   currentFile <- read.delim(filename,header = F, stringsAsFactors = F)
   
   # get rid of all irrelevant trials, i.e. rows that only contain S
-  subset <- as.data.frame(currentFile[grep("S_", currentFile$V1),])
-  colnames(subset) <- c("OrigMarker")
+  #subset <- as.data.frame(currentFile[grep("S_", currentFile$V1),])
+  colnames(currentFile) <- c("OrigMarker")
   
   # split remaining markers
-  newdataframe <- as.data.frame(str_split_fixed(as.character(subset$OrigMarker),"_", n = 7))
+  newdataframe <- as.data.frame(str_split_fixed(as.character(currentFile$OrigMarker),"_", n = 7))
 
   # split column 4 even further 
   final <- cbind(read.fwf(file = textConnection(as.character(newdataframe[, 4])), 
                  widths = c(1, 1, 1, 1), colClasses = "character", 
                  col.names = c("ID1", "ID2", "ID3", "ID4")), 
         newdataframe[-1])
-  final <- final[,-7]
+  
+  final$V8 <- NA
+  for (i in 1:nrow(final)) {
+    if (is.na(final$ID1[i]) == 1) {
+      final$V8[i] <- 0
+    } else {
+      final$V8[i] <- 1
+    }
+  } 
   
   # replace characters with numbers where needed
   final$V2 <-  lapply(final$V2, function(x) {gsub("c","1",x)})

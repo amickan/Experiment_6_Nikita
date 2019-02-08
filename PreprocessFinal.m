@@ -1,15 +1,16 @@
 %%% EEG analysis script Thesis Nikita %%%
 %function PreprocessFinal(pNumber) 
-    cd('\\cnas.ru.nl\wrkgrp\STD-Julia-Back-Up\Julia final back up EEG data june 7 2018\') % this is where EEG data is stored 
+    cd('\\cnas.ru.nl\wrkgrp\STD-Julia-Back-Up\') % this is where EEG data is stored 
     %example number 
-    pNumber = 'P101';
+    pNumber = '124';
 
     % test
     % define files for this participant
-    vhdr = strcat(pNumber, '.vhdr');
-    preprocFile = strcat('PreprocessedData_firsthalf\', pNumber, '_FinalTestPart1_data_all_preprocessed');
-    cond1out = strcat('PreprocessedData_firsthalf\', pNumber, '_data_clean_1_cond1');
-    cond2out = strcat('PreprocessedData_firsthalf\', pNumber, '_data_clean_1_cond2');
+    vhdr = strcat('Julia final back up EEG data june 7 2018\P', pNumber, '.vhdr');
+    preprocFile = strcat('PROCESSED_DATA_NIKITA\', pNumber, '_data_all_after_AR');
+    all_data_file = strcat('PROCESSED_DATA_NIKITA\', pNumber, '_all_before_AR');
+    cond1out = strcat('PROCESSED_DATA_NIKITA\', pNumber, '_data_clean_1_cond1');
+    cond2out = strcat('PROCESSED_DATA_NIKITA\', pNumber, '_data_clean_1_cond2');
 
     % defining settings for trial selection
     cfg                     = [];
@@ -17,7 +18,7 @@
     cfg.trialfun            = 'ft_trialfun_general';                % selecting all trials for now
     cfg.trialdef.prestim    = 0.5;                                  % time before marker in seconds (should be generous to avoid filtering artifacts)
     cfg.trialdef.poststim   = 1;                                  % time after marker in seconds (should be generous to avoid filtering artifacts)
-    cfg.trialdef.eventvalue = {'S 12', 'S 14'};                     % markers marking stimulus events in the final test
+    cfg.trialdef.eventvalue = {'S 12', 'S 14', 'S 13', 'S 15'};                     % markers marking stimulus events in the final test
     cfg.trialdef.eventtype  = 'Stimulus';
     
     % Define trials (in cfg.trl)
@@ -45,7 +46,7 @@
     data_eeg                = ft_preprocessing(cfg); 
     % only keep the newly created ref channel
     cfg                     = [];
-    cfg.channel             = setdiff(1:32, 9);                   % you can use either strings or numbers as selection
+    cfg.channel             = setdiff(1:32, 8);                   % you can use either strings or numbers as selection
     data_eeg                = ft_selectdata(cfg, data_eeg);
     data_eeg_raw            = ft_selectdata(cfg, data_eeg_raw);
     
@@ -56,7 +57,7 @@
     cfgHEOG.trialdef.eventvalue = {'S 12', 'S 14'};             % markers marking stimulus events in the final test
     cfgHEOG.trialdef.eventtype  = 'Stimulus';
     cfgHEOG.trialdef.prestim    = 0.5;                          % time before marker in seconds (should be generous to avoid filtering artifacts)
-    cfgHEOG.trialdef.poststim   = 1.5;                          % time after marker in seconds (should be generous to avoid filtering artifacts)
+    cfgHEOG.trialdef.poststim   = 1;                          % time after marker in seconds (should be generous to avoid filtering artifacts)
     cfgHEOG.reref               = 'yes';
     cfgHEOG.refchannel          = 'LhorEOG';
     cfgHEOG.channel             = {'LhorEOG', 'RhorEOG'};      % horizontal EOG channels
@@ -92,7 +93,7 @@
     cfgVEOG.trialdef.eventvalue = {'S 12', 'S 14'};             % markers marking stimulus events in the final test
     cfgVEOG.trialdef.eventtype  = 'Stimulus';
     cfgVEOG.trialdef.prestim    = 0.5;                          % time before marker in seconds (should be generous to avoid filtering artifacts)
-    cfgVEOG.trialdef.poststim   = 1.5;                          % time after marker in seconds (should be generous to avoid filtering artifacts)
+    cfgVEOG.trialdef.poststim   = 1;                          % time after marker in seconds (should be generous to avoid filtering artifacts)
     cfgVEOG.reref               = 'yes';
     cfgVEOG.channel             = {'UpVertEOG', 'LoVertEOG'};
     cfgVEOG.refchannel          = 'UpVertEOG';
@@ -106,8 +107,8 @@
     %cfgVEOG.baselinewindow      = [-0.2 0];                     % data will be baseline corrected in a window from -200ms to stimulus onset
     % apply the set parameters on the data
     data_VEOG                   = ft_preprocessing (cfgVEOG);
-    data_VEOG.label(2)          = {'EOGV'};                     % rename newly created channel
-    data_VEOG_raw.label(2)      = {'EOGV'};
+    data_VEOG.label(1)          = {'EOGV'};                     % rename newly created channel
+    data_VEOG_raw.label(1)      = {'EOGV'};
     % only keep the newly created channel
     cfgVEOG                     = [];
     cfgVEOG.channel             = 'EOGV';                      % you can use either strings or numbers as selection
@@ -129,10 +130,13 @@
     
     % Add behavioral information matrix to the trialinfo matrix for later
     % Only works when the log file and data are of same length
-    behavFilename = strcat(num2str(pNumber), '\Day3\', num2str(pNumber),'_FinalTest\', num2str(pNumber),'_BehavMatrixFinalTest.txt');
+    behavFilename = strcat('Logfiles_For_Fieldtrip\', pNumber, '_logfile.txt');
     behav = load(behavFilename);
     data_all.trialinfo = [data_all.trialinfo behav];
-
+    
+    save(all_data_file, 'data_all');
+    % load(all_data_file)  % if you want to start from here
+    
 
     %% Artifact rejection 
     % automatic artifact rejection
@@ -153,7 +157,7 @@
     [cfg, artifact_threshold]               = ft_artifact_threshold(cfg, data_all);
 
     % Eye-blinks
-    cfg.artfctdef.zvalue.channel               = [32,17];  % only HEOG and VEOG
+    cfg.artfctdef.zvalue.channel               = [29,30];  % only HEOG and VEOG
     cfg.artfctdef.zvalue.bpfilter              = 'yes';
     cfg.artfctdef.zvalue.bpfilttype            = 'but';
     cfg.artfctdef.zvalue.bpfreq                = [1 15];
@@ -168,7 +172,7 @@
     cfg.selectmode              = 'markartifact';
     cfg.eegscale                = 1;
     cfg.eogscale                = 1.5;
-    cfg.layout                  = 'actiCAP_32ch_Standard2.mat';
+    cfg.layout                  = 'acticap-64ch-standard2_XZ.mat';
     cfg                         = ft_databrowser(cfg, data_all);                       % double click on segments to mark them as artefacts, then at the end exist the box by clicking 'q' or the X
     
     % double checking on raw data for dubious eye-artifacts?
@@ -182,7 +186,7 @@
     
     % once all rejections have been made
     cfg.artfctdef.reject        = 'complete';                                          % this rejects complete trials, use 'partial' if you want to do partial artifact rejection
-    cfg.artfctdef.crittoilim    = [-0.2 1];                                            % rejects trial only when artifact is within a certain time window of itnerest
+    cfg.artfctdef.crittoilim    = [0 1];                                            % rejects trial only when artifact is within a certain time window of itnerest
     data_clean                  = ft_rejectartifact(cfg, data_all); 
 
     
@@ -227,14 +231,14 @@
     %cond2 = ft_timelockanalysis(cfg, data_finaltestcond2);
     % plotting average
     %cfg = [];
-    %cfg.layout = 'actiCAP_64ch_Standard2.mat';
+    %cfg.layout = 'acticap-64ch-standard2_XZ.mat';
     %cfg.interactive = 'yes';
     %cfg.showoutline = 'yes';
     %cfg.showlabels = 'yes'; 
     %cfg.colorbar = 'yes';
     %cfg.fontsize = 6; 
     %cfg.ylim = [-10 10];
-    %ft_multiplotER(cfg, cond1, cond2);
+    %ft_multiplotER(cfg, data_eeg);
     
     disp('##############################################');
     disp(['## Done preprocessing first half PP_', num2str(pNumber),' ################']);

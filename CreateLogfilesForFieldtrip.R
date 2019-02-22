@@ -62,10 +62,29 @@ for (i in 1:length(A)){
   
   as.data.frame(t(do.call(rbind.data.frame, final))) -> final2
   
+  final2[final2==""]  <- NA
+  #final2[is.na(final2)==1]  <- '99'
+  
   print(paste(pNumber, ": ", nrow(final2)))
   
   # safe the new data frame as a txt with the participant number 
   setwd("//cnas.ru.nl/wrkgrp/STD-Julia-Back-Up/Logfiles_For_Fieldtrip")
   outfile <-  paste(pNumber, "_logfile.txt", sep = "")
   write.table(final2, outfile, quote = F, col.names=F, row.names = F, sep = "\t")
+}
+
+
+#### change NA to 99
+A <- c(101:130, 133:137, 201, 203, 205, 207,209,211,214,218,219)
+
+# read in the new marker file for each person and rewrite it as a text file with trialxinfo columns structure
+for (i in 1:length(A)){
+  pNumber <- A[i]
+  setwd("//cnas.ru.nl/wrkgrp/STD-Julia-Back-Up/Logfiles_For_Fieldtrip")
+  infile <-  paste(pNumber, "_logfile.txt", sep = "")
+  currentFile <- read.delim(infile,header = F, stringsAsFactors = F)
+  currentFile[is.na(currentFile)==1] <- 99
+  
+  # safe the new data frame as a txt with the participant number 
+  write.table(currentFile, infile, quote = F, col.names=F, row.names = F, sep = "\t")
 }

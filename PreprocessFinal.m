@@ -1,17 +1,25 @@
 %%% EEG analysis script Thesis Nikita %%%
-%function PreprocessFinal(pNumber) 
-    cd('\\cnas.ru.nl\wrkgrp\STD-Julia-Back-Up\') % this is where EEG data is stored 
+function PreprocessFinal(pNumber) 
+    cd('\\cnas.ru.nl\wrkgrp\STD-Julia-Back-Up\') % this is where EEG data is stored
+    %cd('C:\Users\tieks\Documents\Thesis\OscillatorySignaturesOfWordLearning');  
     %example number 
-    pNumber = '124';
+    %pNumber = '101';
 
     % test
     % define files for this participant
-    vhdr = strcat('Julia final back up EEG data june 7 2018\P', pNumber, '.vhdr');
-    preprocFile = strcat('PROCESSED_DATA_NIKITA\', pNumber, '_data_all_after_AR');
-    all_data_file = strcat('PROCESSED_DATA_NIKITA\', pNumber, '_all_before_AR');
-    cond1out = strcat('PROCESSED_DATA_NIKITA\', pNumber, '_data_clean_1_cond1');
-    cond2out = strcat('PROCESSED_DATA_NIKITA\', pNumber, '_data_clean_1_cond2');
-
+    vhdr = strcat('Julia final back up EEG data june 7 2018\P', num2str(pNumber), '.vhdr');
+    preprocFile = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), '_data_all_after_AR');
+    all_data_file = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), '_all_before_AR');
+    trial_sel_comp_1_a = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), 'trial_sel_comp_1_a'); %Unknown versus known at first exposure; unknown target selection
+    trial_sel_comp_1_b = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), 'trial_sel_comp_1_b'); %Unknown versus known at first exposure; known filler selection
+    trial_sel_comp_2_a = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), 'trial_sel_comp_2_a'); %Learned versus not learned targets during first exposure; learned targets
+    trial_sel_comp_2_b = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), 'trial_sel_comp_2_b'); %Learned versus not learned targets during first exposure; not learned targets
+    trial_sel_comp_3_a = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), 'trial_sel_comp_3_a'); %Second occurence, not learned in first occurence versus matched known filler words; not learned targets
+    trial_sel_comp_3_b = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), 'trial_sel_comp_3_b'); %Second occurence, not learned in first occurence versus matched known filler words; matched known fillers
+    trial_sel_comp_4_a = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), 'trial_sel_comp_4_a'); %Second occurence, learned in first occurence versus matched known filler words; learned target words
+    trial_sel_comp_4_b = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), 'trial_sel_comp_4_b'); %Second occurence, learned in first occurence versus matched known filler words; matched known fillers
+    
+    
     % defining settings for trial selection
     cfg                     = [];
     cfg.dataset             = vhdr;                                 % raw data file name
@@ -54,7 +62,7 @@
     cfgHEOG                     = [];                           % initiate new, empty cfg for the horizontal EOG preprocessing 
     cfgHEOG.dataset             = vhdr;
     cfgHEOG.trialfun            = 'ft_trialfun_general';        % selecting all trials
-    cfgHEOG.trialdef.eventvalue = {'S 12', 'S 14'};             % markers marking stimulus events in the final test
+    cfgHEOG.trialdef.eventvalue = {'S 12', 'S 14', 'S 13', 'S 15'};             % markers marking stimulus events in the final test
     cfgHEOG.trialdef.eventtype  = 'Stimulus';
     cfgHEOG.trialdef.prestim    = 0.5;                          % time before marker in seconds (should be generous to avoid filtering artifacts)
     cfgHEOG.trialdef.poststim   = 1;                          % time after marker in seconds (should be generous to avoid filtering artifacts)
@@ -90,7 +98,7 @@
     cfgVEOG                     = [];
     cfgVEOG.dataset             = vhdr;
     cfgVEOG.trialfun            = 'ft_trialfun_general';        % selecting all trials
-    cfgVEOG.trialdef.eventvalue = {'S 12', 'S 14'};             % markers marking stimulus events in the final test
+    cfgVEOG.trialdef.eventvalue = {'S 12', 'S 14', 'S 13', 'S 15'};             % markers marking stimulus events in the final test
     cfgVEOG.trialdef.eventtype  = 'Stimulus';
     cfgVEOG.trialdef.prestim    = 0.5;                          % time before marker in seconds (should be generous to avoid filtering artifacts)
     cfgVEOG.trialdef.poststim   = 1;                          % time after marker in seconds (should be generous to avoid filtering artifacts)
@@ -130,13 +138,17 @@
     
     % Add behavioral information matrix to the trialinfo matrix for later
     % Only works when the log file and data are of same length
-    behavFilename = strcat('Logfiles_For_Fieldtrip\', pNumber, '_logfile.txt');
+    behavFilename = strcat('Logfiles_For_Fieldtrip\', num2str(pNumber), '_logfile.txt');
     behav = load(behavFilename);
     data_all.trialinfo = [data_all.trialinfo behav];
     
     save(all_data_file, 'data_all');
-    % load(all_data_file)  % if you want to start from here
-    
+    % data_all = load(all_data_file);  % if you want to start from here
+    % data_all = data_all.data_all;
+    % subset to only useful trials 
+    cfg.trials     = find((data_all.trialinfo(:,11) == 1));
+    indeces = find((data_all.trialinfo(:,11) == 1));
+    data_all  = ft_selectdata(cfg, data_all);
 
     %% Artifact rejection 
     % automatic artifact rejection
@@ -204,48 +216,211 @@
     save(preprocFile, 'data_clean');
     % load(preprocFile)  % if you want to start from here
     
-    %% Cut data in two conditions and save datasets seperately 
-    cfg                 = [];
-    cfg.trials          = find((data_clean.trialinfo(:,9) == 1)& (data_clean.trialinfo(:,3) == 1)); % based on user defined conditions, certain columns containing 1 and 0
-    data_cond1          = ft_selectdata(cfg, data_clean);
-    cfg                 = [];
-    cfg.trials          = find((data_clean.trialinfo(:,9) == 1)& (data_clean.trialinfo(:,3) == 2)); 
-    data_cond2          = ft_selectdata(cfg, data_clean);
-    
-    save(cond1out, 'data_cond1');
-    save(cond2out, 'data_cond2');
+    %% Cut data in 8 comparison conditions and save datasets seperately 
+    %Comparison 1
+    %Unknown versus known at first exposure
+    %equals target versus filler at first exposure
+    %Targets of comparison
+    cfg                             = [];
+    % First occurence, beginning of word(col7=11), only targets(col6=1), that were unknown in pretest(col2=0) and whose fillers were known(col10=1)
+    cfg.trials                      = find((data_clean.trialinfo(:,7) == 11)& (data_clean.trialinfo(:,6) == 1)& (data_clean.trialinfo(:,2) == 0)& (data_clean.trialinfo(:,10) == 1)); 
+    data_tar_unknown_1              = ft_selectdata(cfg, data_clean);
 
-    % document how many trials were kept for later analysis
-    c1 = length(data_cond1.trial);
-    c2 = length(data_cond2.trial);
+    %Fillers of same comparison
+    cfg                             = [];
+    % First occurence, beginning of word,(col7=11) only fillers(col6=2), that were known in pretest(col2~=0)
+    intermediate                    = find((data_clean.trialinfo(:,7) == 11)& (data_clean.trialinfo(:,6) == 2)& (data_clean.trialinfo(:,2) ~= 0)); 
+    numbers                         =  data_tar_unknown_1.trialinfo(:,9);
+    [x,ind]                         = ismember(numbers, data_clean.trialinfo(intermediate,9));
+    ind                             = nonzeros(ind);
+    newdata                         = data_clean.trialinfo(intermediate,:);
+    cfg.trials                      = intermediate(ind);
+    data_fil_known_1                = ft_selectdata(cfg, data_clean);
     
+    %Comparison 2   
+    %Learned versus not learned targets during first exposure
+    %Learned targets of comparison
+    cfg                             = [];
+    % First occurence, beginning of word(col7=11), only targets(col6=1), that were unknown in pretest(col2=0), whose fillers were known (col10=1) and were learned during first presentation (col2~=0)
+    cfg.trials                      = find((data_clean.trialinfo(:,7) == 11)& (data_clean.trialinfo(:,6) == 1)& (data_clean.trialinfo(:,2) == 0)& (data_clean.trialinfo(:,10) == 1)& (data_clean.trialinfo(:,3) ~= 0)); 
+    data_tar_learned_1              = ft_selectdata(cfg, data_clean);
+
+    %Not learned targets of comparison
+    cfg                             = [];
+    % First occurence, beginning of word(col7=11), only targets(col6=1), that were unknown in pretest(col2=0), whose fillers were known (col10=1) and were not learned during first presentation (col2=0)
+    cfg.trials                      = find((data_clean.trialinfo(:,7) == 11)& (data_clean.trialinfo(:,6) == 1)& (data_clean.trialinfo(:,2) == 0)& (data_clean.trialinfo(:,10) == 1)& (data_clean.trialinfo(:,3) == 0)); 
+    data_tar_not_learned_1          = ft_selectdata(cfg, data_clean);
+
+    %Comparison 3
+    %Not learned targets during first occurence versus matched known filler words
+    %Not learned targets
+    cfg                             = [];
+    % Second occurence, beginning of word(col7=21), only
+    % targets(col6=1),that were unknown in pretest(col2=0), whose
+    % fillers were known (col10=1), and that were not learned in the first
+    % occurence (col3=0)
+    cfg.trials                      = find((data_clean.trialinfo(:,7) == 21)& (data_clean.trialinfo(:,6) == 1)& (data_clean.trialinfo(:,2) == 0)& (data_clean.trialinfo(:,10) == 1)& (data_clean.trialinfo(:,3) == 0)); 
+    data_tar_not_learned_2          = ft_selectdata(cfg, data_clean);
+    numbers                         =  data_tar_not_learned_2.trialinfo(:,9);
+    %Matched known fillers
+    cfg                             = [];
+    % Second occurence, beginning of word(col7=21), fillers(col6=2), that were known in pretest(col2~=0) and which were matched to target words
+    intermediate                    = find((data_clean.trialinfo(:,7) == 21)& (data_clean.trialinfo(:,6) == 2)& (data_clean.trialinfo(:,2) ~= 0));
+    [x,ind]                         = ismember(numbers, data_clean.trialinfo(intermediate,9));
+    ind                             = nonzeros(ind);
+    newdata                         = data_clean.trialinfo(intermediate,:);
+    cfg.trials                      = intermediate(ind);
+    data_fill_matched_not_learned   = ft_selectdata(cfg, data_clean);
+
+    %Comparison 4
+    %Learned targets during first occurence versus matched known filler words
+    %Learned targets
+    cfg                         = [];
+    % Second occurence, beginning of word(col7=21), only targets(col6=1),
+    % that were unknown in pretest(col2=0), whose fillers were
+    % known(col10=1) and that were learned in the first occurence(col3~=0)
+    cfg.trials                  = find((data_clean.trialinfo(:,7) == 21)& (data_clean.trialinfo(:,6) == 1)& (data_clean.trialinfo(:,2) == 0)& (data_clean.trialinfo(:,10) == 1)& (data_clean.trialinfo(:,3) ~= 0)); 
+    data_tar_learned_2          = ft_selectdata(cfg, data_clean);
+    numbers                     =  data_tar_learned_2.trialinfo(:,9);
+    %Matched known fillers
+    cfg                         = [];
+    % Second occurence, beginning of word(col7=21), fillers(col6=2), that were known in pretest(col2~=0) and which were matched to target words
+    intermediate                = find((data_clean.trialinfo(:,7) == 21)& (data_clean.trialinfo(:,6) == 2)& (data_clean.trialinfo(:,2) ~= 0)); 
+    [x,ind]                     = ismember(numbers, data_clean.trialinfo(intermediate,9));
+    ind                         = nonzeros(ind);
+    newdata                     = data_clean.trialinfo(intermediate,:);
+    cfg.trials                  = intermediate(ind);
+    data_fill_matched_learned   = ft_selectdata(cfg, data_clean);
+ 
+    %Save the seperate datasets
+    save(trail_sel_comp_1_a, 'data_tar_unknown_1');
+    save(trail_sel_comp_1_b, 'data_fil_known_1');
+    save(trail_sel_comp_2_a, 'data_tar_learned_1');
+    save(trail_sel_comp_2_b, 'data_tar_not_learned_1');
+    save(trail_sel_comp_3_a, 'data_tar_not_learned_2');
+    save(trail_sel_comp_3_b, 'data_fill_matched_not_learned');
+    save(trail_sel_comp_4_a, 'data_tar_learned_2');
+    save(trail_sel_comp_4_b, 'data_fill_matched_learned');
+        
+    %Document how many trials were kept for later analysis
+    a = length(data_tar_unknown_1.trial);
+    b = length(data_fil_known_1.trial);
+    c = length(data_tar_learned_1.trial);
+    d = length(data_tar_not_learned_1.trial);
+    e = length(data_tar_not_learned_2.trial);
+    f = length(data_fill_matched_not_learned.trial);
+    g = length(data_tar_learned_2.trial);
+    h = length(data_fill_matched_learned.trial);
+
     % save trial information in txt
-    fid = fopen('TrialCount_PostPreprocessing_FirstHalf.txt','a');
-    formatSpec = '%d\t%d\t%d\n';
-    fprintf(fid,formatSpec,pNumber,c1,c2);
+    fid = fopen('TrialCount_PostPreprocessing.txt','a');
+    formatSpec = '%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n';
+    fprintf(fid,formatSpec,pNumber,a,b,c,d,e,f,g,h);
+
+    %Trial selection again but then for before artifact rejection
+    %Comparison 1
+    %Unknown versus known at first exposure
+    %equals target versus filler at first exposure
+    %Targets of comparison
+    cfg                 = [];
+    % First occurence, beginning of word(col7=11), only targets(col6=1), that were unknown in pretest(col2=0) and whose fillers were known(col10=1)
+    cfg.trials          = find((data_all.trialinfo(:,7) == 11)& (data_all.trialinfo(:,6) == 1)& (data_all.trialinfo(:,2) == 0)& (data_all.trialinfo(:,10) == 1)); 
+    data_tar_unknown_1  = ft_selectdata(cfg, data_all);
+
+    %Fillers of same comparison
+    cfg                 = [];
+    % First occurence, beginning of word,(col7=11) only fillers(col6=2), that were known in pretest(col2~=0)
+    intermediate        = find((data_all.trialinfo(:,7) == 11)& (data_all.trialinfo(:,6) == 2)& (data_all.trialinfo(:,2) ~= 0)); 
+    numbers             =  data_tar_unknown_1.trialinfo(:,9);
+    [x,ind]             = ismember(numbers, data_all.trialinfo(intermediate,9));
+    ind                 = nonzeros(ind);
+    newdata             = data_all.trialinfo(intermediate,:);
+    cfg.trials          = intermediate(ind);
+    data_fil_known_1    = ft_selectdata(cfg, data_all);
     
-    % calculating average for this pp 
-    %cfg = [];
-    %cfg.keeptrials='yes';
-    %cond1 = ft_timelockanalysis(cfg, data_finaltestcond1);
-    %cond2 = ft_timelockanalysis(cfg, data_finaltestcond2);
-    % plotting average
-    %cfg = [];
-    %cfg.layout = 'acticap-64ch-standard2_XZ.mat';
-    %cfg.interactive = 'yes';
-    %cfg.showoutline = 'yes';
-    %cfg.showlabels = 'yes'; 
-    %cfg.colorbar = 'yes';
-    %cfg.fontsize = 6; 
-    %cfg.ylim = [-10 10];
-    %ft_multiplotER(cfg, data_eeg);
+    %Comparison 2   
+    %Learned versus not learned targets during first exposure
+    %Learned targets of comparison
+    cfg                     = [];
+    % First occurence, beginning of word(col7=11), only targets(col6=1), that were unknown in pretest(col2=0), whose fillers were known (col10=1) and were learned during first presentation (col2~=0)
+    cfg.trials              = find((data_all.trialinfo(:,7) == 11)& (data_all.trialinfo(:,6) == 1)& (data_all.trialinfo(:,2) == 0)& (data_all.trialinfo(:,10) == 1)& (data_all.trialinfo(:,3) ~= 0)); 
+    data_tar_learned_1      = ft_selectdata(cfg, data_all);
+
+    %Not learned targets of comparison
+    cfg                     = [];
+    % First occurence, beginning of word(col7=11), only targets(col6=1), that were unknown in pretest(col2=0), whose fillers were known (col10=1) and were not learned during first presentation (col2=0)
+    cfg.trials              = find((data_all.trialinfo(:,7) == 11)& (data_all.trialinfo(:,6) == 1)& (data_all.trialinfo(:,2) == 0)& (data_all.trialinfo(:,10) == 1)& (data_all.trialinfo(:,3) == 0)); 
+    data_tar_not_learned_1  = ft_selectdata(cfg, data_all);
+
+    %Comparison 3
+    %Not learned targets during first occurence versus matched known filler words
+    %Not learned targets
+    cfg                             = [];
+    % Second occurence, beginning of word(col7=21), only
+    % targets(col6=1),that were unknown in pretest(col2=0), whose
+    % fillers were known (col10=1), and that were not learned in the first
+    % occurence (col3=0)
+    cfg.trials                      = find((data_all.trialinfo(:,7) == 21)& (data_all.trialinfo(:,6) == 1)& (data_all.trialinfo(:,2) == 0)& (data_all.trialinfo(:,10) == 1)& (data_all.trialinfo(:,3) == 0)); 
+    data_tar_not_learned_2          = ft_selectdata(cfg, data_all);
+    numbers                         =  data_tar_not_learned_2.trialinfo(:,9);
+    %Matched known fillers
+    cfg                             = [];
+    % Second occurence, beginning of word(col7=21), fillers(col6=2), that were known in pretest(col2~=0) and which were matched to target words
+    intermediate                    = find((data_all.trialinfo(:,7) == 21)& (data_all.trialinfo(:,6) == 2)& (data_all.trialinfo(:,2) ~= 0));
+    [x,ind]                         = ismember(numbers, data_all.trialinfo(intermediate,9));
+    ind                             = nonzeros(ind);
+    newdata                         = data_all.trialinfo(intermediate,:);
+    cfg.trials                      = intermediate(ind);
+    data_fill_matched_not_learned   = ft_selectdata(cfg, data_all);
+
+    %Comparison 4
+    %Learned targets during first occurence versus matched known filler words
+    %Learned targets
+    cfg                         = [];
+    % Second occurence, beginning of word(col7=21), only targets(col6=1),
+    % that were unknown in pretest(col2=0), whose fillers were
+    % known(col10=1) and that were learned in the first occurence(col3~=0)
+    cfg.trials                  = find((data_all.trialinfo(:,7) == 21)& (data_all.trialinfo(:,6) == 1)& (data_all.trialinfo(:,2) == 0)& (data_all.trialinfo(:,10) == 1)& (data_all.trialinfo(:,3) ~= 0)); 
+    data_tar_learned_2          = ft_selectdata(cfg, data_all);
+    numbers                     =  data_tar_learned_2.trialinfo(:,9);
+    %Matched known fillers
+    cfg                         = [];
+    % Second occurence, beginning of word(col7=21), fillers(col6=2), that were known in pretest(col2~=0) and which were matched to target words
+    intermediate                = find((data_all.trialinfo(:,7) == 21)& (data_all.trialinfo(:,6) == 2)& (data_all.trialinfo(:,2) ~= 0)); 
+    [x,ind]                     = ismember(numbers, data_all.trialinfo(intermediate,9));
+    ind                         = nonzeros(ind);
+    newdata                     = data_all.trialinfo(intermediate,:);
+    cfg.trials                  = intermediate(ind);
+    data_fill_matched_learned   = ft_selectdata(cfg, data_all);
+        
+    %Document how many trials were kept for later analysis
+    a1 = length(data_tar_unknown_1.trial);
+    b1 = length(data_fil_known_1.trial);
+    c1 = length(data_tar_learned_1.trial);
+    d1 = length(data_tar_not_learned_1.trial);
+    e1 = length(data_tar_not_learned_2.trial);
+    f1 = length(data_fill_matched_not_learned.trial);
+    g1 = length(data_tar_learned_2.trial);
+    h1 = length(data_fill_matched_learned.trial);
+
+    % save trial information in txt
+    fid = fopen('TrialCount_BeforeArtRej.txt','a');
+    formatSpec = '%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n';
+    fprintf(fid,formatSpec,pNumber,a1,b1,c1,d1,e1,f1,g1,h1);
+    
     
     disp('##############################################');
-    disp(['## Done preprocessing first half PP_', num2str(pNumber),' ################']);
-    disp(['## Trials for interference condition: ', num2str(c1), ' #####']);
-    disp(['## Trials for no-interference condition: ', num2str(c2),' ##']);
+    disp(['## Done preprocessing PP_', num2str(pNumber),' ################']);
+    disp(['## Trials for trial_sel_comp_1_a: ', num2str(a), ' #####']);
+    disp(['## Trials for trial_sel_comp_1_b: ', num2str(b),' ##']);
+    disp(['## Trials for trial_sel_comp_2_a: ', num2str(c), ' #####']);
+    disp(['## Trials for trial_sel_comp_2_b: ', num2str(d),' ##']);   
+    disp(['## Trials for trial_sel_comp_3_a: ', num2str(h), ' #####']);
+    disp(['## Trials for trial_sel_comp_3_b: ', num2str(f),' ##']);
+    disp(['## Trials for trial_sel_comp_4_a: ', num2str(g), ' #####']);
+    disp(['## Trials for trial_sel_comp_4_b: ', num2str(h),' ##']);   
     disp('##############################################');
     
     % change this to your Github folder directory, to be able to run the
     % script again from the start
-    cd('U:\PhD\EXPERIMENT 2 - EEG\EEG-analysis\');  
+    cd('C:\Users\tieks\Documents\Thesis\OscillatorySignaturesOfWordLearning');  

@@ -5,7 +5,7 @@
 
 #### Outcoming dataframe column definitions: 
 ## C1: known at pretest
-## C2 ; known at 1st occurence
+## C2: known at 1st occurence
 ## C3: known at 2nd occurence
 ## C4: known at posttest
 ## C5: target (1) or filler (2)
@@ -71,7 +71,7 @@ for (i in 1:length(A)){
      final$V7[k] <- NA
    } 
   }
-  
+
   final <- final[,-7]
   
   as.data.frame(t(do.call(rbind.data.frame, final))) -> final2

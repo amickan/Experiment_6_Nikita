@@ -165,7 +165,7 @@ function PreprocessFinal(pNumber)
     cfg.artfctdef.threshold.range           = 150;
     cfg.artfctdef.threshold.min             = -100; 
     cfg.artfctdef.threshold.max             = 100;
-    cfg.trl                                 = data_all.cfg.previous{1,1}.previous.trl;
+    cfg.trl                                 = data_all.cfg.previous.previous{1,1}.previous.trl(indeces,:);
     [cfg, artifact_threshold]               = ft_artifact_threshold(cfg, data_all);
 
     % Eye-blinks

@@ -143,8 +143,7 @@ function PreprocessFinal(pNumber)
     data_all.trialinfo = [data_all.trialinfo behav];
     
     save(all_data_file, 'data_all');
-    % data_all = load(all_data_file);  % if you want to start from here
-    % data_all = data_all.data_all;
+    % load(all_data_file);  % if you want to start from here
     % subset to only useful trials 
     cfg.trials     = find((data_all.trialinfo(:,11) == 1));
     indeces = find((data_all.trialinfo(:,11) == 1));
@@ -315,7 +314,7 @@ function PreprocessFinal(pNumber)
     % save trial information in txt
     cd('\\cnas.ru.nl\wrkgrp\STD-Julia-Back-Up\') 
     fid = fopen('PROCESSED_DATA_NIKITA\TrialCount_PostPreprocessing.txt','a');
-    formatSpec = '%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n';
+    formatSpec = '%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n';
     fprintf(fid,formatSpec,pNumber,a,b,c,d,e,f,g,h);
 
     %Trial selection again but then for before artifact rejection
@@ -407,7 +406,7 @@ function PreprocessFinal(pNumber)
     % save trial information in txt
     cd('\\cnas.ru.nl\wrkgrp\STD-Julia-Back-Up\') 
     fid = fopen('PROCESSED_DATA_NIKITA\TrialCount_BeforeArtRej.txt','a');
-    formatSpec = '%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n';
+    formatSpec = '%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n';
     fprintf(fid,formatSpec,pNumber,a1,b1,c1,d1,e1,f1,g1,h1);
     
     

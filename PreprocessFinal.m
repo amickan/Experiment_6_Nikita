@@ -10,14 +10,14 @@ function PreprocessFinal(pNumber)
     vhdr = strcat('Julia final back up EEG data june 7 2018\P', num2str(pNumber), '.vhdr');
     preprocFile = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), '_data_all_after_AR');
     all_data_file = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), '_all_before_AR');
-    trial_sel_comp_1_a = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), 'trial_sel_comp_1_a'); %Unknown versus known at first exposure; unknown target selection
-    trial_sel_comp_1_b = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), 'trial_sel_comp_1_b'); %Unknown versus known at first exposure; known filler selection
-    trial_sel_comp_2_a = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), 'trial_sel_comp_2_a'); %Learned versus not learned targets during first exposure; learned targets
-    trial_sel_comp_2_b = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), 'trial_sel_comp_2_b'); %Learned versus not learned targets during first exposure; not learned targets
-    trial_sel_comp_3_a = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), 'trial_sel_comp_3_a'); %Second occurence, not learned in first occurence versus matched known filler words; not learned targets
-    trial_sel_comp_3_b = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), 'trial_sel_comp_3_b'); %Second occurence, not learned in first occurence versus matched known filler words; matched known fillers
-    trial_sel_comp_4_a = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), 'trial_sel_comp_4_a'); %Second occurence, learned in first occurence versus matched known filler words; learned target words
-    trial_sel_comp_4_b = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), 'trial_sel_comp_4_b'); %Second occurence, learned in first occurence versus matched known filler words; matched known fillers
+    trial_sel_comp_1_a = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), '_trial_sel_comp_1_a'); %Unknown versus known at first exposure; unknown target selection
+    trial_sel_comp_1_b = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), '_trial_sel_comp_1_b'); %Unknown versus known at first exposure; known filler selection
+    trial_sel_comp_2_a = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), '_trial_sel_comp_2_a'); %Learned versus not learned targets during first exposure; learned targets
+    trial_sel_comp_2_b = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), '_trial_sel_comp_2_b'); %Learned versus not learned targets during first exposure; not learned targets
+    trial_sel_comp_3_a = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), '_trial_sel_comp_3_a'); %Second occurence, not learned in first occurence versus matched known filler words; not learned targets
+    trial_sel_comp_3_b = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), '_trial_sel_comp_3_b'); %Second occurence, not learned in first occurence versus matched known filler words; matched known fillers
+    trial_sel_comp_4_a = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), '_trial_sel_comp_4_a'); %Second occurence, learned in first occurence versus matched known filler words; learned target words
+    trial_sel_comp_4_b = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), '_trial_sel_comp_4_b'); %Second occurence, learned in first occurence versus matched known filler words; matched known fillers
     
     
     % defining settings for trial selection
@@ -293,14 +293,14 @@ function PreprocessFinal(pNumber)
     data_fill_matched_learned   = ft_selectdata(cfg, data_clean);
  
     %Save the seperate datasets
-    save(trail_sel_comp_1_a, 'data_tar_unknown_1');
-    save(trail_sel_comp_1_b, 'data_fil_known_1');
-    save(trail_sel_comp_2_a, 'data_tar_learned_1');
-    save(trail_sel_comp_2_b, 'data_tar_not_learned_1');
-    save(trail_sel_comp_3_a, 'data_tar_not_learned_2');
-    save(trail_sel_comp_3_b, 'data_fill_matched_not_learned');
-    save(trail_sel_comp_4_a, 'data_tar_learned_2');
-    save(trail_sel_comp_4_b, 'data_fill_matched_learned');
+    save(trial_sel_comp_1_a, 'data_tar_unknown_1');
+    save(trial_sel_comp_1_b, 'data_fil_known_1');
+    save(trial_sel_comp_2_a, 'data_tar_learned_1');
+    save(trial_sel_comp_2_b, 'data_tar_not_learned_1');
+    save(trial_sel_comp_3_a, 'data_tar_not_learned_2');
+    save(trial_sel_comp_3_b, 'data_fill_matched_not_learned');
+    save(trial_sel_comp_4_a, 'data_tar_learned_2');
+    save(trial_sel_comp_4_b, 'data_fill_matched_learned');
         
     %Document how many trials were kept for later analysis
     a = length(data_tar_unknown_1.trial);
@@ -313,7 +313,8 @@ function PreprocessFinal(pNumber)
     h = length(data_fill_matched_learned.trial);
 
     % save trial information in txt
-    fid = fopen('TrialCount_PostPreprocessing.txt','a');
+    cd('\\cnas.ru.nl\wrkgrp\STD-Julia-Back-Up\') 
+    fid = fopen('PROCESSED_DATA_NIKITA\TrialCount_PostPreprocessing.txt','a');
     formatSpec = '%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n';
     fprintf(fid,formatSpec,pNumber,a,b,c,d,e,f,g,h);
 
@@ -404,7 +405,8 @@ function PreprocessFinal(pNumber)
     h1 = length(data_fill_matched_learned.trial);
 
     % save trial information in txt
-    fid = fopen('TrialCount_BeforeArtRej.txt','a');
+    cd('\\cnas.ru.nl\wrkgrp\STD-Julia-Back-Up\') 
+    fid = fopen('PROCESSED_DATA_NIKITA\TrialCount_BeforeArtRej.txt','a');
     formatSpec = '%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n';
     fprintf(fid,formatSpec,pNumber,a1,b1,c1,d1,e1,f1,g1,h1);
     

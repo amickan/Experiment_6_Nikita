@@ -149,6 +149,56 @@ function PreprocessFinal(pNumber)
     indeces = find((data_all.trialinfo(:,11) == 1));
     data_all  = ft_selectdata(cfg, data_all);
 
+    %% ICA
+    %Independent component analysis    
+    %Decomposition of EEG data
+    % perform the independent component analysis (i.e., decompose the data)
+    cfg        = [];
+    cfg.method = 'runica'; % this is the default and uses the implementation from EEGLAB
+
+    comp = ft_componentanalysis(cfg, data_all);
+    
+    %Identify components reflecting eye artifacts
+    % plot the components for visual inspection
+    figure
+    cfg = [];
+    cfg.component = 1:20;       % specify the component(s) that should be plotted
+    cfg.layout    = 'acticap-64ch-standard2_XZ.mat'; % specify the layout file that should be used for plotting
+    cfg.comment   = 'no';
+    ft_topoplotIC(cfg, comp)
+    
+    %Further inspection of time course of component
+    cfg = [];
+    cfg.layout = 'acticap-64ch-standard2_XZ.mat'; % specify the layout file that should be used for plotting
+    cfg.viewmode = 'component';
+    ft_databrowser(cfg, comp);
+    %Display normal data to compare
+    cfg = [];
+    cfg.layout = 'acticap-64ch-standard2_XZ.mat'; % specify the layout file that should be used for plotting
+    cfg.viewmode                = 'vertical';
+    ft_databrowser(cfg, data_all);
+    
+    %Pause until enter is pressed to allow for checking data
+    currkey=0;
+    % do not move on until enter key is pressed
+    while currkey~=1
+        pause; % wait for a keypress
+        currkey=get(gcf,'CurrentKey'); 
+        if strcmp(currkey, 'return') == 1 % You also want to use strcmp here.
+            currkey=1 % Error was here; the "==" should be "="
+        else
+            currkey=0 % Error was here; the "==" should be "="
+        end
+    end
+    %Ask which components have to be removed
+    prompt = 'Enter bad components, separate with a comma, inbetween square brackets: ';
+    bad_components = inputdlg(prompt);
+    
+    %Removing bad artifacts and backprojecting data
+    cfg = [];
+    cfg.component = str2num(bad_components{1}); % to be removed component(s)
+    data_all = ft_rejectcomponent(cfg, comp, data_all);
+    
     %% Artifact rejection 
     % automatic artifact rejection
     % Threshold artifact detection: trials with amplitudes above or below
@@ -164,7 +214,7 @@ function PreprocessFinal(pNumber)
     cfg.artfctdef.threshold.range           = 150;
     cfg.artfctdef.threshold.min             = -100; 
     cfg.artfctdef.threshold.max             = 100;
-    cfg.trl                                 = data_all.cfg.previous.previous{1,1}.previous.trl(indeces,:);
+    cfg.trl                                 =  data_all.cfg.previous{1,1}.previous.previous.previous{1,1}.previous.trl(indeces,:);%data_all.cfg.previous.previous{1,1}.previous.trl(indeces,:);
     [cfg, artifact_threshold]               = ft_artifact_threshold(cfg, data_all);
 
     % Eye-blinks
@@ -314,8 +364,8 @@ function PreprocessFinal(pNumber)
     % save trial information in txt
     cd('\\cnas.ru.nl\wrkgrp\STD-Julia-Back-Up\') 
     fid = fopen('PROCESSED_DATA_NIKITA\TrialCount_PostPreprocessing.txt','a');
-    formatSpec = '%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n';
-    fprintf(fid,formatSpec,pNumber,a,b,c,d,e,f,g,h);
+    formatSpec = '%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n';
+    fprintf(fid,formatSpec,str2num(pNumber),a,b,c,d,e,f,g,h);
 
     %Trial selection again but then for before artifact rejection
     %Comparison 1
@@ -406,8 +456,8 @@ function PreprocessFinal(pNumber)
     % save trial information in txt
     cd('\\cnas.ru.nl\wrkgrp\STD-Julia-Back-Up\') 
     fid = fopen('PROCESSED_DATA_NIKITA\TrialCount_BeforeArtRej.txt','a');
-    formatSpec = '%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n';
-    fprintf(fid,formatSpec,pNumber,a1,b1,c1,d1,e1,f1,g1,h1);
+    formatSpec = '%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n';
+    fprintf(fid,formatSpec,str2num(pNumber),a1,b1,c1,d1,e1,f1,g1,h1);
     
     
     disp('##############################################');

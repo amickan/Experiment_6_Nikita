@@ -3,7 +3,7 @@ function PreprocessFinal(pNumber)
     cd('\\cnas.ru.nl\wrkgrp\STD-Julia-Back-Up\') % this is where EEG data is stored
     %cd('C:\Users\tieks\Documents\Thesis\OscillatorySignaturesOfWordLearning');  
     %example number 
-    %pNumber = '101';
+    %pNumber = 102;
 
     % test
     % define files for this participant
@@ -365,7 +365,7 @@ function PreprocessFinal(pNumber)
     cd('\\cnas.ru.nl\wrkgrp\STD-Julia-Back-Up\') 
     fid = fopen('PROCESSED_DATA_NIKITA\TrialCount_PostPreprocessing.txt','a');
     formatSpec = '%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n';
-    fprintf(fid,formatSpec,str2num(pNumber),a,b,c,d,e,f,g,h);
+    fprintf(fid,formatSpec,pNumber,a,b,c,d,e,f,g,h);
 
     %Trial selection again but then for before artifact rejection
     %Comparison 1
@@ -457,7 +457,7 @@ function PreprocessFinal(pNumber)
     cd('\\cnas.ru.nl\wrkgrp\STD-Julia-Back-Up\') 
     fid = fopen('PROCESSED_DATA_NIKITA\TrialCount_BeforeArtRej.txt','a');
     formatSpec = '%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n';
-    fprintf(fid,formatSpec,str2num(pNumber),a1,b1,c1,d1,e1,f1,g1,h1);
+    fprintf(fid,formatSpec,pNumber,a1,b1,c1,d1,e1,f1,g1,h1);
     
     
     disp('##############################################');
@@ -466,7 +466,7 @@ function PreprocessFinal(pNumber)
     disp(['## Trials for trial_sel_comp_1_b: ', num2str(b),' ##']);
     disp(['## Trials for trial_sel_comp_2_a: ', num2str(c), ' #####']);
     disp(['## Trials for trial_sel_comp_2_b: ', num2str(d),' ##']);   
-    disp(['## Trials for trial_sel_comp_3_a: ', num2str(h), ' #####']);
+    disp(['## Trials for trial_sel_comp_3_a: ', num2str(e), ' #####']);
     disp(['## Trials for trial_sel_comp_3_b: ', num2str(f),' ##']);
     disp(['## Trials for trial_sel_comp_4_a: ', num2str(g), ' #####']);
     disp(['## Trials for trial_sel_comp_4_b: ', num2str(h),' ##']);   

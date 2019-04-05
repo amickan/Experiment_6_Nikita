@@ -3,7 +3,7 @@ function PreprocessFinal(pNumber)
     cd('\\cnas.ru.nl\wrkgrp\STD-Julia-Back-Up\') % this is where EEG data is stored
     %cd('C:\Users\tieks\Documents\Thesis\OscillatorySignaturesOfWordLearning');  
     %example number 
-    %pNumber = 102;
+    %pNumber = 103;
 
     % test
     % define files for this participant
@@ -191,7 +191,7 @@ function PreprocessFinal(pNumber)
         end
     end
     %Ask which components have to be removed
-    prompt = 'Enter bad components, separate with a comma, inbetween square brackets: ';
+    prompt = 'Enter bad components, separate with a comma: ';
     bad_components = inputdlg(prompt);
     
     %Removing bad artifacts and backprojecting data

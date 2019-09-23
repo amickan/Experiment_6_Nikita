@@ -1,6 +1,6 @@
 %%% Permutation script for oscillations
 
-subjects = [101,102,103,108,109, 111, 114]; % subjects that should be included in grand average
+subjects = [101,102,103,108,109, 111, 114, 116, 119, 120,121, 126,133, 134 ]; % subjects that should be included in grand average
 cd('\\cnas.ru.nl\wrkgrp\STD-Julia-Back-Up\'); % directory with all preprocessed files 
 
 % frequency decomposition settings
@@ -18,19 +18,19 @@ cfg.pad          = 'nextpow2';
 Condition1 = cell(1,length(subjects));
 for i = 1:length(subjects)
     % condition 1 for each participant
-    filename1 = strcat('PROCESSED_DATA_NIKITA\',  num2str(subjects(i)), '_trial_sel_comp_1_a');
+    filename1 = strcat('PROCESSED_DATA_NIKITA\',  num2str(subjects(i)), '_trial_sel_comp_2_a');
     %filename1 = strcat('\\cnas.ru.nl\wrkgrp\STD-Back-Up-Exp2-EEG\PreprocessedData\', num2str(subjects(i)), '_data_clean_cond1');
     dummy = load(filename1);
-    Condition1{i} = ft_freqanalysis(cfg, dummy.data_tar_unknown_1);
+    Condition1{i} = ft_freqanalysis(cfg, dummy.data_tar_learned_1);
     clear dummy
 end
                        
 Condition2 = cell(1,length(subjects));
 for i = 1:length(subjects)
     % condition 2 for each participant
-    filename2 = strcat('PROCESSED_DATA_NIKITA\',num2str(subjects(i)), '_trial_sel_comp_1_b'); %Learned versus not learned targets during first exposure; learned targets
+    filename2 = strcat('PROCESSED_DATA_NIKITA\',num2str(subjects(i)), '_trial_sel_comp_2_b'); %Learned versus not learned targets during first exposure; learned targets
     dummy2 = load(filename2);
-    Condition2{i} = ft_freqanalysis(cfg, dummy2.data_fil_known_1);
+    Condition2{i} = ft_freqanalysis(cfg, dummy2.data_tar_not_learned_1);
     clear dummy2
 end
                        
@@ -41,7 +41,7 @@ cond1 = ft_freqgrandaverage(cfg, Condition1{:});
 cond2 = ft_freqgrandaverage(cfg, Condition2{:});
 
 diff = cond2;
-diff.powspctrm = (cond2.powspctrm - cond1.powspctrm) ./ ((cond2.powspctrm + cond1.powspctrm)/2);
+diff.powspctrm = (cond1.powspctrm - cond2.powspctrm) ./ ((cond1.powspctrm + cond2.powspctrm)/2);
 
 % plot the difference between conditions
 % for all channels (take a long time!!)

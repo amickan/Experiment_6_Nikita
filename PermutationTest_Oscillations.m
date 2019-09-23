@@ -1,7 +1,7 @@
 %%% Permutation script for oscillations
 
-subjects = [301:308, 310:326, 328, 329]; % subjects that should be included in grand average
-%cd('\\cnas.ru.nl\wrkgrp\STD-Back-Up-Exp2-EEG\'); % directory with all preprocessed files 
+subjects = [101,102,103,108,109, 111, 114]; % subjects that should be included in grand average
+cd('\\cnas.ru.nl\wrkgrp\STD-Julia-Back-Up\'); % directory with all preprocessed files 
 
 % frequency decomposition settings
 cfg              = [];
@@ -11,36 +11,37 @@ cfg.method       = 'mtmconvol';
 cfg.taper        = 'hanning';
 cfg.foi          = 2:1:30;                         % analysis 2 to 30 Hz in steps of 1 Hz
 cfg.t_ftimwin    = 3 ./ cfg.foi;                   % ones(length(cfg.foi),1).*0.5;   % length of time window = 0.5 sec
-cfg.toi          = -0.5:0.05:1.5;                  % time window "slides" from -0.5 to 1.5 sec in steps of 0.05 sec (50 ms)
+cfg.toi          = -0.5:0.05:1;                  % time window "slides" from -0.5 to 1.5 sec in steps of 0.05 sec (50 ms)
 cfg.pad          = 'nextpow2';
 %cfg.keeptrials   = 'yes';
 
 Condition1 = cell(1,length(subjects));
 for i = 1:length(subjects)
     % condition 1 for each participant
-    filename1 = strcat('\\cnas.ru.nl\wrkgrp\STD-Back-Up-Exp2-EEG\PreprocessedData\', num2str(subjects(i)), '_data_clean_cond1');
+    filename1 = strcat('PROCESSED_DATA_NIKITA\',  num2str(subjects(i)), '_trial_sel_comp_1_a');
+    %filename1 = strcat('\\cnas.ru.nl\wrkgrp\STD-Back-Up-Exp2-EEG\PreprocessedData\', num2str(subjects(i)), '_data_clean_cond1');
     dummy = load(filename1);
-    Condition1{i} = ft_freqanalysis(cfg, dummy.data_finaltestcond1);
+    Condition1{i} = ft_freqanalysis(cfg, dummy.data_tar_unknown_1);
     clear dummy
 end
                        
 Condition2 = cell(1,length(subjects));
 for i = 1:length(subjects)
     % condition 2 for each participant
-    filename2 = strcat('\\cnas.ru.nl\wrkgrp\STD-Back-Up-Exp2-EEG\PreprocessedData\', num2str(subjects(i)), '_data_clean_cond2');
+    filename2 = strcat('PROCESSED_DATA_NIKITA\',num2str(subjects(i)), '_trial_sel_comp_1_b'); %Learned versus not learned targets during first exposure; learned targets
     dummy2 = load(filename2);
-    Condition2{i} = ft_freqanalysis(cfg, dummy2.data_finaltestcond2);
+    Condition2{i} = ft_freqanalysis(cfg, dummy2.data_fil_known_1);
     clear dummy2
 end
                        
 % grand-average over subjects for conditions
 cfg = [];
-cfg.keepindividuals='no';
+cfg.keepindividuals='yes';
 cond1 = ft_freqgrandaverage(cfg, Condition1{:});
 cond2 = ft_freqgrandaverage(cfg, Condition2{:});
 
-diff = cond1;
-diff.powspctrm = (cond1.powspctrm - cond2.powspctrm) ./ ((cond1.powspctrm + cond2.powspctrm)/2);
+diff = cond2;
+diff.powspctrm = (cond2.powspctrm - cond1.powspctrm) ./ ((cond2.powspctrm + cond1.powspctrm)/2);
 
 % plot the difference between conditions
 % for all channels (take a long time!!)
@@ -67,22 +68,22 @@ ft_singleplotTFR(cfg, diff);
 %%% Alternative way of looking at data: calculate a structure which is the weighted diff
 %eff = Condition2;
 %for i = 1:length(subjects)
-%    eff{i}.powspctrm = (Condition1{i}.powspctrm - Condition2{i}.powspctrm) ./ ((Condition1{i}.powspctrm + Condition2{i}.powspctrm)/2);
+%    eff{i}.powspctrm = (Condition2{i}.powspctrm - Condition1{i}.powspctrm) ./ ((Condition2{i}.powspctrm + Condition1{i}.powspctrm)/2);
 %end
 %% grand-average
 %cfg = [];
-%cfg.keepindividuals='no';
+%cfg.keepindividuals='yes';
 %effect = ft_freqgrandaverage(cfg, eff{:});
 
 % Create neighbourhood structure
 %cd('\\cnas.ru.nl\wrkgrp\STD-Back-Up-Exp2-EEG\');    % go to folder where the layout files is situated
 % maybe better to load the neighbourhood structure from template
 cfg_neighb                  = [];
-cfg_neighb.method           = 'distance';        
+cfg_neighb.method           = 'triangulation';        
 cfg_neighb.channel          = 'EEG';
 cfg_neighb.layout           = 'actiCAP_64ch_Standard2.mat';
 cfg_neighb.feedback         = 'yes';
-cfg_neighb.neighbourdist    = 0.15;                 % higher number: more is linked!
+%cfg_neighb.neighbourdist    = 0.15;                 % higher number: more is linked!
 neighbours                  = ft_prepare_neighbours(cfg_neighb, Condition1{1});
 
 % Permutation test

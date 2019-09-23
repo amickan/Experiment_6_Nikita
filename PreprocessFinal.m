@@ -474,4 +474,5 @@ function PreprocessFinal(pNumber)
     
     % change this to your Github folder directory, to be able to run the
     % script again from the start
-    cd('C:\Users\tieks\Documents\Thesis\OscillatorySignaturesOfWordLearning');  
+    cd('U:\PhD\Experiment_6_Nikita')
+    %cd('C:\Users\tieks\Documents\Thesis\OscillatorySignaturesOfWordLearning');  

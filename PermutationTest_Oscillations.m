@@ -18,19 +18,19 @@ cfg.pad          = 'nextpow2';
 Condition1 = cell(1,length(subjects));
 for i = 1:length(subjects)
     % condition 1 for each participant
-    filename1 = strcat('PROCESSED_DATA_NIKITA\',  num2str(subjects(i)), '_trial_sel_comp_2_a');
+    filename1 = strcat('PROCESSED_DATA_NIKITA\',  num2str(subjects(i)), '_trial_sel_comp_1_a');
     %filename1 = strcat('\\cnas.ru.nl\wrkgrp\STD-Back-Up-Exp2-EEG\PreprocessedData\', num2str(subjects(i)), '_data_clean_cond1');
     dummy = load(filename1);
-    Condition1{i} = ft_freqanalysis(cfg, dummy.data_tar_learned_1);
+    Condition1{i} = ft_freqanalysis(cfg, dummy.data_tar_unknown_1);
     clear dummy
 end
                        
 Condition2 = cell(1,length(subjects));
 for i = 1:length(subjects)
     % condition 2 for each participant
-    filename2 = strcat('PROCESSED_DATA_NIKITA\',num2str(subjects(i)), '_trial_sel_comp_2_b'); %Learned versus not learned targets during first exposure; learned targets
+    filename2 = strcat('PROCESSED_DATA_NIKITA\',num2str(subjects(i)), '_trial_sel_comp_1_b'); %Learned versus not learned targets during first exposure; learned targets
     dummy2 = load(filename2);
-    Condition2{i} = ft_freqanalysis(cfg, dummy2.data_tar_not_learned_1);
+    Condition2{i} = ft_freqanalysis(cfg, dummy2.data_fil_known_1);
     clear dummy2
 end
                        
@@ -123,17 +123,17 @@ cfg.ivar                = 2;                         % number or list with indic
 [stat]                  = ft_freqstatistics(cfg, Condition1{:}, Condition2{:});
 
 % stats with the weighted effect structure
-null                    = cond1;
-null.powspctrm          = zeros(size(cond1.powspctrm));
-[stat]                  = ft_freqstatistics(cfg, effect, null);
+%null                    = cond1;
+%null.powspctrm          = zeros(size(cond1.powspctrm));
+%[stat]                  = ft_freqstatistics(cfg, effect, null);
 
 % plot the result
-cfg                     = [];
-cfg.alpha               = 0.05;
-cfg.parameter           = 'stat';
-cfg.zlim                = [-3 3];
-cfg.layout              = 'actiCAP_64ch_Standard2.mat';
-ft_clusterplot(cfg, stat);
+%cfg                     = [];                           %First average over electrodes in the cluster
+%cfg.alpha               = 0.05;
+%cfg.parameter           = 'stat';
+%cfg.zlim                = [-3 3];
+%cfg.layout              = 'actiCAP_64ch_Standard2.mat';
+%ft_clusterplot(cfg, stat);
 
 % get relevant (significant) values
 pos_cluster_pvals = [stat.posclusters(:).prob];

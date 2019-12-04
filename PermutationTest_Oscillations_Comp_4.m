@@ -18,19 +18,19 @@ cfg.pad          = 'nextpow2';
 Condition1 = cell(1,length(subjects));
 for i = 1:length(subjects)
     % condition 1 for each participant
-    filename1 = strcat('PROCESSED_DATA_NIKITA\',  num2str(subjects(i)), '_trial_sel_comp_1_a');
+    filename1 = strcat('PROCESSED_DATA_NIKITA\',  num2str(subjects(i)), '_trial_sel_comp_4_a');
     %filename1 = strcat('\\cnas.ru.nl\wrkgrp\STD-Back-Up-Exp2-EEG\PreprocessedData\', num2str(subjects(i)), '_data_clean_cond1');
     dummy = load(filename1);
-    Condition1{i} = ft_freqanalysis(cfg, dummy.data_tar_unknown_1);
+    Condition1{i} = ft_freqanalysis(cfg, dummy.data_tar_learned_2);
     clear dummy
 end
                        
 Condition2 = cell(1,length(subjects));
 for i = 1:length(subjects)
     % condition 2 for each participant
-    filename2 = strcat('PROCESSED_DATA_NIKITA\',num2str(subjects(i)), '_trial_sel_comp_1_b'); %Learned versus not learned targets during first exposure; learned targets
+    filename2 = strcat('PROCESSED_DATA_NIKITA\',num2str(subjects(i)), '_trial_sel_comp_4_b'); %Learned versus not learned targets during first exposure; learned targets
     dummy2 = load(filename2);
-    Condition2{i} = ft_freqanalysis(cfg, dummy2.data_fil_known_1);
+    Condition2{i} = ft_freqanalysis(cfg, dummy2.data_fill_matched_learned);
     clear dummy2
 end
                        

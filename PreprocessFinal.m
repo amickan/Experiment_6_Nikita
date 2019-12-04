@@ -7,7 +7,7 @@ function PreprocessFinal(pNumber)
 
     % test
     % define files for this participant
-    vhdr = strcat('Julia final back up EEG data june 7 2018\P', num2str(pNumber), '.vhdr');
+    vhdr = strcat('Julia final back up EEG data june 7 2018\' , num2str(pNumber), '.vhdr');
     preprocFile = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), '_data_all_after_AR');
     all_data_file = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), '_all_before_AR');
     trial_sel_comp_1_a = strcat('PROCESSED_DATA_NIKITA\', num2str(pNumber), '_trial_sel_comp_1_a'); %Unknown versus known at first exposure; unknown target selection

@@ -23,6 +23,7 @@ require(data.table)
 
 # subject numbers
 A <- c(101:130, 133:137, 201, 203, 205, 207,209,211,214,218,219)
+A <- c(222,223)
 
 # read in the new marker file for each person and rewrite it as a text file with trialxinfo columns structure
 for (i in 1:length(A)){

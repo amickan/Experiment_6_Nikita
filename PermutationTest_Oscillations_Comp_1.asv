@@ -103,6 +103,61 @@ cfg.ivar                = 2;                         % number or list with indic
 % stats with the weighted effect structure
 [stat]                  = ft_freqstatistics(cfg, effect, null);
 
+%%%% PLOTTING %%%%
+  
+% Topoplot: this averages over time and frequency but not over electrodes,
+% so you get a little head image that shows how your effect is distributed
+% spacially, for that you simply enter the time window of your effect and
+% the frequency bands you looked at
+cfg = [];
+cfg.xlim = [0.5 1];  %time window of the effect
+cfg.ylim = [4 10];   % frequencies of interest
+cfg.zlim = [-3 3];   % depending on how strong your effect is you might want to adjust this downward or upward, this reflect t-values, which need to be above 2 to be significant, 3 is a good start, but if the plot looks too contrasty you can up these values 
+cfg.layout = 'actiCAP_64ch_Standard2.mat'; 
+cfg.parameter = 'stat'; % this means you are plotting the actual effect you found
+cfg.maskparameter = 'mask';
+ft_topoplotTFR(cfg, stat); % here you are giving it the data structure with the stats info you just computed
+
+% Plot the time-frequency representation: in this plot you will need to
+% average over a number of electrodes, the ones that you see are involved
+% and representative of the effect that you see in the plot before this one
+% you could also average over all electrodes that are in the output you got
+% earlier, but it might be that all electrodes are involved, in which case
+% the plot will be less informative (i.e. the effect will look much
+% weaker), so I would instead go by the visual of the topolot above and
+% chose whatever electrodes are in the strongest (most red or most
+
+cfg = [];
+%cfg.baseline     = [-0.5 -0.1];
+%cfg.baselinetype = 'absolute';
+%cfg.maskstyle    = 'saturation';
+%cfg.zlim         = [-3e-27 3e-27];
+cfg.channel      = {'Cz'}; % {'Cz', 'Pz'} for more channels 
+%cfg.colormap      = redblue;
+figure
+ft_singleplotTFR(cfg, effect);
+%ft_singleplotTFR(cfg, diff);
+%ft_singleplotTFR(cfg, stat);
+
+
+
+% Plot the TFR for all channels (taked a long time!! not necessary in my eyes)
+%cfg              = [];
+%%cfg.baseline     = [-0.5 0];
+%%cfg.baselinetype = 'absolute';
+%%cfg.zlim         = [-3e-27 3e-27];
+%cfg.showlabels   = 'yes';
+%cfg.layout       = 'actiCAP_64ch_Standard2.mat';
+%figure
+%ft_multiplotTFR(cfg, diff);
+% plot the result
+%cfg                     = [];                           %First average over electrodes in the cluster
+%cfg.alpha               = 0.05;
+%cfg.parameter           = 'stat';
+%cfg.zlim                = [-3 3];
+%cfg.layout              = 'actiCAP_64ch_Standard2.mat';
+%ft_clusterplot(cfg, stat);
+
 % get relevant (significant) values
 if isempty(stat.posclusters) == 0
     pos_cluster_pvals = [stat.posclusters(:).prob];
@@ -153,62 +208,3 @@ if numberofsignclustersneg > 0
         disp(['The following ', num2str(length(unique(foundx'))),' channels are included in this significant cluster:  ', num2str(unique(foundx'))])
     end
 end
-
-
-%%%% PLOTTING %%%%
-  
-% Topoplot: this averages over time and frequency but not over electrodes,
-% so you get a little head image that shows how your effect is distributed
-% spacially, for that you simply enter the time window of your effect and
-% the frequency bands you looked at
-cfg = [];
-cfg.xlim = [0.5 1];  %time window of the effect
-cfg.ylim = [4 10];   % frequencies of interest
-cfg.zlim = [-3 3];   % depending on how strong your effect is you might want to adjust this downward or upward, this reflect t-values, which need to be above 2 to be significant, 3 is a good start, but if the plot looks too contrasty you can up these values 
-cfg.layout = 'actiCAP_64ch_Standard2.mat'; 
-cfg.parameter = 'stat'; % this means you are plotting the actual effect you found
-cfg.maskparameter = 'mask';
-ft_topoplotTFR(cfg, stat); % here you are giving it the data structure with the stats info you just computed
-
-% Plot the time-frequency representation: in this plot you will need to
-% average over a number of electrodes, the ones that you see are involved
-% and representative of the effect that you see in the plot before this one
-% you could also average over all electrodes that are in the output you got
-% earlier, but it might be that all electrodes are involved, in which case
-% the plot will be less informative (i.e. the effect will look much
-% weaker), so I would instead go by the visual of the topolot above and
-% chose whatever electrodes are in the strongest (most red or most blue)
-% area of the effect. In my previous study I ended up averaging over 12
-% electrodes, the central ones. You can aim for something like that, but
-% feel free to ask me once you have the topoplot! 
-
-cfg = [];
-%cfg.baseline     = [-0.5 -0.1];
-%cfg.baselinetype = 'absolute';
-%cfg.maskstyle    = 'saturation';
-%cfg.zlim         = [-3e-27 3e-27];
-cfg.channel      = {'Cz'}; % {'Cz', 'Pz'} for more channels 
-%cfg.colormap      = redblue;
-figure
-ft_singleplotTFR(cfg, effect);
-%ft_singleplotTFR(cfg, stat);  % if you use this you again plot t-values
-%rather than the actualy data, but I think that's not necessary
-
-% Plot the TFR for all channels (taked a long time!! not necessary in my eyes)
-%cfg              = [];
-%%cfg.baseline     = [-0.5 0];
-%%cfg.baselinetype = 'absolute';
-%%cfg.zlim         = [-3e-27 3e-27];
-%cfg.showlabels   = 'yes';
-%cfg.layout       = 'actiCAP_64ch_Standard2.mat';
-%figure
-%ft_multiplotTFR(cfg, diff);
-
-% Not quite sure what this plot does, but I'm leaving it in here anyway
-% plot the result
-%cfg                     = [];                           %First average over electrodes in the cluster
-%cfg.alpha               = 0.05;
-%cfg.parameter           = 'stat';
-%cfg.zlim                = [-3 3];
-%cfg.layout              = 'actiCAP_64ch_Standard2.mat';
-%ft_clusterplot(cfg, stat);

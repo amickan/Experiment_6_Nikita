@@ -36,48 +36,27 @@ end
                        
 % grand-average over subjects for conditions
 cfg = [];
-cfg.keepindividuals='yes';
+cfg.keepindividual='yes';
 cond1 = ft_freqgrandaverage(cfg, Condition1{:});
 cond2 = ft_freqgrandaverage(cfg, Condition2{:});
 
 diff = cond2;
 diff.powspctrm = (cond1.powspctrm - cond2.powspctrm) ./ ((cond1.powspctrm + cond2.powspctrm)/2);
-
-% plot the difference between conditions
-% for all channels (take a long time!!)
-cfg              = [];
-%cfg.baseline     = [-0.5 0];
-%cfg.baselinetype = 'absolute';
-%cfg.zlim         = [-3e-27 3e-27];
-cfg.showlabels   = 'yes';
-cfg.layout       = 'actiCAP_64ch_Standard2.mat';
-figure
-ft_multiplotTFR(cfg, diff);
-                       
-% one channel (or more)
-cfg = [];
-%cfg.baseline     = [-0.5 -0.1];
-%cfg.baselinetype = 'absolute';
-%cfg.maskstyle    = 'saturation';
-%cfg.zlim         = [-3e-27 3e-27];
-cfg.channel      = {'Cz'};
-%cfg.colormap      = redblue;
-figure
-ft_singleplotTFR(cfg, diff);
                        
 %%% Alternative way of looking at data: calculate a structure which is the weighted diff
-%eff = Condition2;
-%for i = 1:length(subjects)
-%    eff{i}.powspctrm = (Condition2{i}.powspctrm - Condition1{i}.powspctrm) ./ ((Condition2{i}.powspctrm + Condition1{i}.powspctrm)/2);
-%end
+eff = Condition2;
+for i = 1:length(subjects)
+    eff{i}.powspctrm = (Condition1{i}.powspctrm - Condition2{i}.powspctrm) ./ ((Condition1{i}.powspctrm + Condition2{i}.powspctrm)/2);
+end
 %% grand-average
-%cfg = [];
-%cfg.keepindividuals='yes';
-%effect = ft_freqgrandaverage(cfg, eff{:});
+cfg = [];
+cfg.keepindividual='yes';
+effect = ft_freqgrandaverage(cfg, eff{:});
+
+null                    = effect;
+null.powspctrm          = zeros(size(cond1.powspctrm));
 
 % Create neighbourhood structure
-%cd('\\cnas.ru.nl\wrkgrp\STD-Back-Up-Exp2-EEG\');    % go to folder where the layout files is situated
-% maybe better to load the neighbourhood structure from template
 cfg_neighb                  = [];
 cfg_neighb.method           = 'triangulation';        
 cfg_neighb.channel          = 'EEG';
@@ -89,7 +68,7 @@ neighbours                  = ft_prepare_neighbours(cfg_neighb, Condition1{1});
 % Permutation test
 cfg = [];
 cfg.channel          = {'EEG'};                     % only EEG channels in analysis, possibly restrict even more, i.e. exclude bad channels
-cfg.latency          = [0 1];                       % time window in seconds
+cfg.latency          = [0.2 0.5];                   % NEEDS to be adjusted!!!! time window in seconds
 cfg.method           = 'montecarlo';
 cfg.frequency        = [4 10];                      % look only at frequency between 4 and 10 Hz, or 'all';
 cfg.statistic        = 'ft_statfun_depsamplesT';    % for a simple dependent t-test, other tests can be specified here
@@ -100,7 +79,7 @@ cfg.minnbchan        = 2;
 cfg.tail             = 0;                           % for a two-tailed test, 1 or -1 for one-tailed tests
 cfg.clustertail      = 0;
 cfg.alpha            = 0.05;
-cfg.numrandomization = 1000;
+cfg.numrandomization = 2000;
 cfg.correcttail      = 'prob';
 cfg.neighbours       = neighbours;
 
@@ -120,39 +99,34 @@ cfg.design              = design;
 cfg.uvar                = 1;                         % unit variable
 cfg.ivar                = 2;                         % number or list with indices indicating the independent variable(s)
 
-[stat]                  = ft_freqstatistics(cfg, Condition1{:}, Condition2{:});
-
+%[stat]                  = ft_freqstatistics(cfg, Condition1{:}, Condition2{:});
 % stats with the weighted effect structure
-null                    = cond1;
-null.powspctrm          = zeros(size(cond1.powspctrm));
 [stat]                  = ft_freqstatistics(cfg, effect, null);
 
-% plot the result
-cfg                     = [];                           %First average over electrodes in the cluster
-cfg.alpha               = 0.05;
-cfg.parameter           = 'stat';
-cfg.zlim                = [-3 3];
-cfg.layout              = 'actiCAP_64ch_Standard2.mat';
-ft_clusterplot(cfg, stat);
-
-
 % get relevant (significant) values
-pos_cluster_pvals = [stat.posclusters(:).prob];
-pos_signif_clust = find(pos_cluster_pvals < stat.cfg.alpha);
-pos = ismember(stat.posclusterslabelmat, pos_signif_clust);
+if isempty(stat.posclusters) == 0
+    pos_cluster_pvals = [stat.posclusters(:).prob];
+    pos_signif_clust = find(pos_cluster_pvals < stat.cfg.alpha);
+    pos = ismember(stat.posclusterslabelmat, pos_signif_clust);
+    select = pos_cluster_pvals < stat.cfg.alpha;
+    signclusters = pos_cluster_pvals(select);
+    numberofsignclusters = length(signclusters);
+    disp(['there are ', num2str(numberofsignclusters), ' significant positive clusters']);
+else
+    numberofsignclusters = 0;
+end
 
-neg_cluster_pvals = [stat.negclusters(:).prob];
-neg_signif_clust = find(neg_cluster_pvals < stat.cfg.alpha);
-neg = ismember(stat.negclusterslabelmat, neg_signif_clust);
-
-select = pos_cluster_pvals < stat.cfg.alpha;
-selectneg = neg_cluster_pvals < stat.cfg.alpha;
-signclusters = pos_cluster_pvals(select);
-signclustersneg = neg_cluster_pvals(selectneg);
-numberofsignclusters = length(signclusters);
-numberofsignclustersneg = length(signclustersneg);
-disp(['there are ', num2str(numberofsignclusters), ' significant positive clusters']);
-disp(['there are ', num2str(numberofsignclustersneg), ' significant negative clusters']);
+if isempty(stat.negclusters) == 0
+    neg_cluster_pvals = [stat.negclusters(:).prob];
+    neg_signif_clust = find(neg_cluster_pvals < stat.cfg.alpha);
+    neg = ismember(stat.negclusterslabelmat, neg_signif_clust);
+    selectneg = neg_cluster_pvals < stat.cfg.alpha;
+    signclustersneg = neg_cluster_pvals(selectneg);
+    numberofsignclustersneg = length(signclustersneg);
+    disp(['there are ', num2str(numberofsignclustersneg), ' significant negative clusters']);
+else 
+    numberofsignclustersneg = 0;
+end
 
 if numberofsignclusters > 0
     for i = 1:length(signclusters)
@@ -179,3 +153,62 @@ if numberofsignclustersneg > 0
         disp(['The following ', num2str(length(unique(foundx'))),' channels are included in this significant cluster:  ', num2str(unique(foundx'))])
     end
 end
+
+
+%%%% PLOTTING %%%%
+  
+% Topoplot: this averages over time and frequency but not over electrodes,
+% so you get a little head image that shows how your effect is distributed
+% spacially, for that you simply enter the time window of your effect and
+% the frequency bands you looked at
+cfg = [];
+cfg.xlim = [0.5 1];  %time window of the effect
+cfg.ylim = [4 10];   % frequencies of interest
+cfg.zlim = [-3 3];   % depending on how strong your effect is you might want to adjust this downward or upward, this reflect t-values, which need to be above 2 to be significant, 3 is a good start, but if the plot looks too contrasty you can up these values 
+cfg.layout = 'actiCAP_64ch_Standard2.mat'; 
+cfg.parameter = 'stat'; % this means you are plotting the actual effect you found
+cfg.maskparameter = 'mask';
+ft_topoplotTFR(cfg, stat); % here you are giving it the data structure with the stats info you just computed
+
+% Plot the time-frequency representation: in this plot you will need to
+% average over a number of electrodes, the ones that you see are involved
+% and representative of the effect that you see in the plot before this one
+% you could also average over all electrodes that are in the output you got
+% earlier, but it might be that all electrodes are involved, in which case
+% the plot will be less informative (i.e. the effect will look much
+% weaker), so I would instead go by the visual of the topolot above and
+% chose whatever electrodes are in the strongest (most red or most blue)
+% area of the effect. In my previous study I ended up averaging over 12
+% electrodes, the central ones. You can aim for something like that, but
+% feel free to ask me once you have the topoplot! 
+
+cfg = [];
+%cfg.baseline     = [-0.5 -0.1];
+%cfg.baselinetype = 'absolute';
+%cfg.maskstyle    = 'saturation';
+%cfg.zlim         = [-3e-27 3e-27];
+cfg.channel      = {'Cz'}; % {'Cz', 'Pz'} for more channels 
+%cfg.colormap      = redblue;
+figure
+ft_singleplotTFR(cfg, effect);
+%ft_singleplotTFR(cfg, stat);  % if you use this you again plot t-values
+%rather than the actualy data, but I think that's not necessary
+
+% Plot the TFR for all channels (taked a long time!! not necessary in my eyes)
+%cfg              = [];
+%%cfg.baseline     = [-0.5 0];
+%%cfg.baselinetype = 'absolute';
+%%cfg.zlim         = [-3e-27 3e-27];
+%cfg.showlabels   = 'yes';
+%cfg.layout       = 'actiCAP_64ch_Standard2.mat';
+%figure
+%ft_multiplotTFR(cfg, diff);
+
+% Not quite sure what this plot does, but I'm leaving it in here anyway
+% plot the result
+%cfg                     = [];                           %First average over electrodes in the cluster
+%cfg.alpha               = 0.05;
+%cfg.parameter           = 'stat';
+%cfg.zlim                = [-3 3];
+%cfg.layout              = 'actiCAP_64ch_Standard2.mat';
+%ft_clusterplot(cfg, stat);

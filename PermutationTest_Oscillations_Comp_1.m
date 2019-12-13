@@ -68,9 +68,9 @@ neighbours                  = ft_prepare_neighbours(cfg_neighb, Condition1{1});
 % Permutation test
 cfg = [];
 cfg.channel          = {'EEG'};                     % only EEG channels in analysis, possibly restrict even more, i.e. exclude bad channels
-cfg.latency          = [0.2 0.5];                   % NEEDS to be adjusted!!!! time window in seconds
+cfg.latency          = [0.3 1.0];                   % NEEDS to be adjusted!!!! time window in seconds
 cfg.method           = 'montecarlo';
-cfg.frequency        = [4 10];                      % look only at frequency between 4 and 10 Hz, or 'all';
+cfg.frequency        = [12 20];                      % look only at frequency between 4 and 10 Hz, or 'all';
 cfg.statistic        = 'ft_statfun_depsamplesT';    % for a simple dependent t-test, other tests can be specified here
 cfg.correctm         = 'cluster';
 cfg.clusteralpha     = 0.05;
